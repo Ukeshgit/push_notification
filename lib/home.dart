@@ -14,6 +14,7 @@ class _HomeState extends State<Home> {
     // TODO: implement initState
     super.initState();
     NotificationServices().requestNotificationsPermission();
+    NotificationServices().firebaseInit();
     NotificationServices().isTokenAlive();
     NotificationServices().getDeviceToken().then((value) {
       print(value);
@@ -22,6 +23,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Container());
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        title: Text("Push Notification"),
+      ),
+      body: Container(),
+    );
   }
 }

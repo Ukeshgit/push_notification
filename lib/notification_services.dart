@@ -1,7 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationServices {
   FirebaseMessaging message = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlatform _flutterLocalNotificationsPlatform =
+      FlutterLocalNotificationsWindows();
 
   void requestNotificationsPermission() async {
     NotificationSettings settings = await message.requestPermission(
@@ -20,6 +23,24 @@ class NotificationServices {
     } else {
       print("User Denied");
     }
+  }
+
+  void initLocalNotifications() {
+    var androidInitializationSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher.png',
+    );
+    var iosInitializationSettings = DarwinInitializationSettings();
+    var initializationSettings = InitializationSettings(
+      android: androidInitializationSettings,
+      iOS: iosInitializationSettings,
+    );
+  }
+
+  void firebaseInit() {
+    FirebaseMessaging.onMessage.listen((msg) {
+      print(msg.notification!.title.toString());
+      print(msg.notification!.body.toString());
+    });
   }
 
   Future<String?> getDeviceToken() async {
