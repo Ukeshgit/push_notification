@@ -21,4 +21,16 @@ class NotificationServices {
       print("User Denied");
     }
   }
+
+  Future<String?> getDeviceToken() async {
+    var token = await message.getToken();
+    return token;
+  }
+
+  void isTokenAlive() {
+    message.onTokenRefresh.listen((event) {
+      event.toString();
+      print("Token Refreshed Now!!!");
+    });
+  }
 }
