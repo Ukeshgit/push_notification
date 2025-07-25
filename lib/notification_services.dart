@@ -67,7 +67,7 @@ class NotificationServices {
           importance: Importance.high,
           priority: Priority.high,
           ticker: 'ticker',
-          icon: 'ic_notification',
+          icon: 'mipmap/ic_launcher',
         );
 
     DarwinNotificationDetails darwinNotificationDetails =
