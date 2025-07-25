@@ -14,7 +14,7 @@ class _HomeState extends State<Home> {
     // TODO: implement initState
     super.initState();
     NotificationServices().requestNotificationsPermission();
-    NotificationServices().firebaseInit();
+    NotificationServices().firebaseInit(context);
     NotificationServices().isTokenAlive();
     NotificationServices().getDeviceToken().then((value) {
       print(value);

@@ -1,10 +1,15 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationServices {
   FirebaseMessaging message = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlatform _flutterLocalNotificationsPlatform =
-      FlutterLocalNotificationsWindows();
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   void requestNotificationsPermission() async {
     NotificationSettings settings = await message.requestPermission(
@@ -25,21 +30,79 @@ class NotificationServices {
     }
   }
 
-  void initLocalNotifications() {
+  void initLocalNotifications(
+    BuildContext context,
+    RemoteMessage message,
+  ) async {
     var androidInitializationSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher.png',
+      '@mipmap/ic_launcher',
     );
     var iosInitializationSettings = DarwinInitializationSettings();
+
     var initializationSettings = InitializationSettings(
       android: androidInitializationSettings,
       iOS: iosInitializationSettings,
     );
+
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        // handle tap on notification
+      },
+    );
   }
 
-  void firebaseInit() {
+  void showNotifications(RemoteMessage message) async {
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
+      Random.secure().nextInt(1000).toString(),
+      "High important notifications",
+      importance: Importance.max,
+    );
+
+    AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+          channel.id.toString(),
+          channel.name.toString(),
+          channelDescription: channel.description.toString(),
+          importance: Importance.high,
+          priority: Priority.high,
+          ticker: 'ticker',
+          icon: 'ic_notification',
+        );
+
+    DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+      iOS: darwinNotificationDetails,
+    );
+
+    Future.delayed(Duration(seconds: 0), () {
+      _flutterLocalNotificationsPlugin.show(
+        0,
+        message.notification!.title.toString(),
+        message.notification!.body.toString(),
+        notificationDetails,
+      );
+    });
+  }
+
+  void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((msg) {
       print(msg.notification!.title.toString());
-      print(msg.notification!.body.toString());
+      if (kDebugMode) {
+        print(msg.notification!.body.toString());
+      }
+
+      if (Platform.isAndroid) {
+        initLocalNotifications(context, msg);
+        showNotifications(msg);
+      }
     });
   }
 
